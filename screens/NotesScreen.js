@@ -6,16 +6,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, AntDesign } from "@expo/vector-icons";
 import * as SQLite from "expo-sqlite";
 
 const db = SQLite.openDatabase("notes.db");
 
 export default function NotesScreen({ route, navigation }) {
-  const [notes, setNotes] = useState([
-    { title: "Walk the cat", done: false, id: "0" },
-    { title: "Walk the dog", done: false, id: "1" },
-  ]);
+  const [notes, setNotes] = useState([]);
 
   function refreshNotes() {
     db.transaction((tx) => {
@@ -77,6 +74,17 @@ export default function NotesScreen({ route, navigation }) {
     navigation.navigate("Add Note");
   }
 
+  function deleteNote(id) {
+    console.log("deleted" + id);
+    db.transaction(
+      (tx) => {
+        tx.executeSql(`DELETE FROM notes WHERE id = ${id}`);
+      },
+      null,
+      refreshNotes
+    );
+  }
+
   function renderItem({ item }) {
     return (
       <View
@@ -86,9 +94,21 @@ export default function NotesScreen({ route, navigation }) {
           paddingBottom: 20,
           borderBottomColor: "#ccc",
           borderBottomWidth: 1,
+          flexDirection: "row",
+          justifyContent: "space-between",
         }}
       >
-        <Text style={{ textAlign: "left", fontSize: 16 }}>{item.title}</Text>
+        <Text style={{ fontSize: 16 }}>{item.title}</Text>
+        <View>
+          <TouchableOpacity onPress={() => deleteNote(item.id)}>
+            <AntDesign
+              name="delete"
+              size={24}
+              color="black"
+              style={{ marginRight: 20 }}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -99,6 +119,7 @@ export default function NotesScreen({ route, navigation }) {
         style={{ width: "100%" }}
         data={notes}
         renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
       />
     </View>
   );
