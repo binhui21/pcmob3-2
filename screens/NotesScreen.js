@@ -3,6 +3,7 @@ import {
   FlatList,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -17,7 +18,7 @@ export default function NotesScreen({ route, navigation }) {
   function refreshNotes() {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM notes",
+        "SELECT * FROM notes ORDER BY done",
         null,
         (txObj, { rows: { _array } }) => setNotes(_array),
         (txObj, error) => console.log("Error ", error)
